@@ -16,7 +16,7 @@ next = funcionalidad que nos permite saltar a otra cosa, es decir, hasta que no 
         el metodo next, no se sale del middleware y ejecuta lo siguiente*/
 
 exports.ensureAuth = function(req, res, next){
-    /**el token nos debe llegar en una cabecera que se llama authorization*/
+    /**el token nos debe llegar en una cabecera que se llama authorization.*/
     if(!req.headers.authorization){
         return res.status(403).send({message: 'La peticion no tiene la cabecera de autenticacion'});
     }
