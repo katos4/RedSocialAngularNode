@@ -4,7 +4,7 @@ var jwt = require('jwt-simple');
 var moment = require('moment');
 var secret = 'Proyecto_Red_Social_GregorioHarriero';
 
-/**Servicio para crear y codificar el token del usuario con sus datos */
+/**Servicio para crear y codificar el token del usuario con sus datos. */
 
 
 /** Crear un objeto json con los datos del usuario que iran codificados en el token*/
