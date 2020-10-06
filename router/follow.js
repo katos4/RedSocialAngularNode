@@ -5,7 +5,7 @@ var FollowController = require('../controllers/follow');
 var api = express.Router();
 var md_auth = require('../middlewares/authenticated');
 
-/**Rutas pertenecientes a la seccion follow */
+/**Rutas pertenecientes a la seccion follow. */
 
 //api.get('/prueba-follow', FollowController.prueba);
 api.post('/follow', md_auth.ensureAuth, FollowController.saveFollow);

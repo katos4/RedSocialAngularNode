@@ -5,7 +5,7 @@ var MessageController = require('../controllers/message');
 var api = express.Router();
 var md_auth = require('../middlewares/authenticated');
 
-/**Rutas pertenecientes a los mensajes */
+/**Rutas pertenecientes a los mensajes. */
 api.get('/probando-md', md_auth.ensureAuth, MessageController.probando);
 api.post('/message', md_auth.ensureAuth, MessageController.saveMessage);
 api.get('/my-messages/:page?', md_auth.ensureAuth, MessageController.getReceivedMessage);
