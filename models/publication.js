@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-/**Esquema del modelo Publication con todas las propiedades que se guardaran en la bd. */
+/**Esquema del modelo Publication con todas las propiedades que se guardaran en la bd */
 var PublicationSchema = Schema({
     text: String,
     file: String,

@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-/**Esquema del modelo Message con todas las propiedades que se guardaran en la bd */
+/**Esquema del modelo Message con todas las propiedades que se guardaran en la bd. */
 var MessageSchema = Schema({
     text: String,
     viewed: String,

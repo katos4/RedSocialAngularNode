@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-/**Esquema del modelo User con todas las propiedades que se guardaran en la bd */
+/**Esquema del modelo User con todas las propiedades que se guardaran en la bd. */
 var UserSchema = Schema({
     name: String,
     surname: String,
