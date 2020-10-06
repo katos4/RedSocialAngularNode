@@ -1,6 +1,6 @@
 'use strict'
 
-/**Cargar librerias y dependencias */
+/**Cargar librerias y dependencias. */
 var path = require('path');
 var fs = require('fs');
 var moment = require('moment');

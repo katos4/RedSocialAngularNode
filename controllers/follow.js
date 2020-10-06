@@ -1,6 +1,6 @@
 'use strict'
 
-/**Cargar librerias y dependencias */
+/**Cargar librerias y dependencias. */
 
 var mongoosePaginate = require('mongoose-pagination');
 

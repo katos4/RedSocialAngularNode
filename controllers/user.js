@@ -24,7 +24,7 @@ function pruebas(req,res){
     });
 }
 
-/**REGISTRO */
+/**REGISTRO. */
 function saveUser(req, res){
     var params = req.body;
     var user = new User();

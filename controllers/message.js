@@ -1,6 +1,6 @@
 'use strict'
 
-/**Cargar librerias */
+/**Cargar librerias. */
 var moment = require('moment');
 var mongoosePaginate = require('mongoose-pagination');
 
