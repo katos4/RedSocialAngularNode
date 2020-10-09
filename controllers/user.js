@@ -8,6 +8,7 @@ var User = require('../models/user');
 var Follow = require('../models/follow');
 var Publication = require('../models/publication');
 var jwt = require('../services/jwt');
+const user = require('../models/user');
 
 
 
@@ -214,31 +215,30 @@ async function followUserId(user_id){
 
 /**Contadores de cuanta gente seguimos y cuanta gente nos siguen */
 function getCounters(req, res){
-    var userId = req.user.sub;
+    let userId = req.user.sub;
 
-    //si se recibe el id por la url, la variable coge ese, sino coge el que le llega por el body
+    //si se recibe el id por la url, la variable coge ese, si no, coge el que le llega por el body
     if(req.params.id){
        userId = req.params.id;
     }
-
-    getCountFollow(req.params.id).then((value) =>{
+    getCountFollow(userId).then((value) => {
         return res.status(200).send(value);
     }); 
 }
 
 /**Funcion asincrona para obtener el numero de seguidores y seguidos */
-async function getCountFollow(user_id){
-    var following = await Follow.count({'user':user_id}).exec((err, count) => {
+/*async function getCountFollow(user_id){
+    var following = await Follow.countDocuments({'user':user_id}).exec((err, count) => {
         if(err) return hadleError(err);
         return count;
     });
 
-    var followed = await Follow.count({'followed':user_id}).exec((err, count) => {
+    var followed = await Follow.countDocuments({'followed':user_id}).exec((err, count) => {
         if(err) return hadleError(err);
         return count;
     });
 
-    var publications = await Publication.count({'user':user_id}).exec((err, count) => {
+    var publications = await Publication.countDocuments({'user':user_id}).exec((err, count) => {
         if(err) return handleError(err);
         return count;
     });
@@ -248,12 +248,25 @@ async function getCountFollow(user_id){
         followed: followed,
         publications: publications
     }
+}*/
+
+const getCountFollow = async (user_id) => {
+    try{
+        let following = await Follow.countDocuments({"user": user_id},(err, result) => { return result });
+        let followed = await Follow.countDocuments({"followed": user_id}).then(count => count);
+        let publications = await Publication.countDocuments({"user": user_id}, (err, resultado) =>{return resultado});
+ 
+        return { following, followed, publications}
+    } catch(e){
+        console.log(e);
+    }
 }
 
 /** EDITAR DATOS DE USUARIO*/
 function updateUser(req, res){
     var userId = req.params.id;
     var update = req.body;
+
     //borrar propiedad password
     delete update.password;
 
@@ -261,13 +274,30 @@ function updateUser(req, res){
         return res.status(500).send({message:'No tienes permiso para actualizar los datos'});
     }
 
-    User.findByIdAndUpdate(userId, update, {new:true}, (err, userUpdated) => {
-        if(err) return res.status(500).send({message:'Error en la peticion'});
+    //Evitar duplicidad de datos a la hora de actualizar evitando que no se actualice a algo que ya exista
+    User.find({$or:[
+        {email: update.email.toLowerCase()},
+        {nick: update.nick.toLowerCase()}
+    ]}).exec((err, users) => {
 
-        if(!userUpdated) return res.status(404).send({message:'No se ha podido actualizar el usuario'});
+        var user_isset = false;
+        users.forEach((user) =>{
+            if(user && user._id != userId) user_isset = true;
+        });
+        if(user_isset) return res.status(404).send({message:'No tienes permiso para actualizar los datos del usuario'});
 
-        return res.status(200).send({user: userUpdated});
+        //Actualizar el usuario con los datos recibidos del frontend
+        User.findByIdAndUpdate(userId, update, {new:true}, (err, userUpdated) => {
+            if(err) return res.status(500).send({message:'Error en la peticion'});
+    
+            if(!userUpdated) return res.status(404).send({message:'No se ha podido actualizar el usuario'});
+    
+            return res.status(200).send({user: userUpdated});
+        });
+
     });
+    
+   
 }
 
 /** SUBIR ARCHIVOS DE IMAGEN / AVATAR DEL USUARIO*/
