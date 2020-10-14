@@ -180,34 +180,55 @@ function getUsers(req, res){
     });
 }
 
-async function followUserId(user_id){
-    /*array con todos los ids de los usuarios que me estan siguiendo (campo followed en la bd) user_id es el usuario
-    identificado en este momento, todos los demas valores se ponen a 0 para quitarlos de la respuesta*/
-    var following = await Follow.find({'user':user_id}).select({'_id':0,'__v':0,'user':0}).exec((err, follows) =>{
-        return follows;
-    });
+const followUserId = async (user_id) => {
+   try{
 
-    var followed = await Follow.find({'followed':user_id}).select({'_id':0,'__v':0,'followed':0}).exec((err, follows) =>{
-       return follows;
-    });
+        /*array con todos los ids de los usuarios que me estan siguiendo (campo followed en la bd) user_id es el usuario
+        identificado en este momento, todos los demas valores se ponen a 0 para quitarlos de la respuesta*/
 
-    //Procesar following ids
-    var following_clean = [];
+       // var following = await Follow.find({'user':user_id}).select({'_id':0,'__v':0,'user':0}).exec((err, follows) =>{return follows;});
+        /**USUARIOS A LOS QUE SIGO */
+       var following = await Follow.find({'user':user_id}).select({'_id':0,'__v':0,'user':0}).exec()
+            .then((follows) => {
+                return follows
+            }).catch((error) => {
+                return handleError(error);
+            });
+       
+        //var followed = await Follow.find({'followed':user_id}).select({'_id':0,'__v':0,'followed':0}).exec((err, follows) =>{return follows;});
+        /**USUARIOS QUE ME SIGUEN */
+        var followed = await Follow.find({'followed':user_id}).select({'_id':0,'__v':0,'followed':0}).exec()
+            .then((follows) => {
+                return follows
+            }).catch((error) => {
+                return handleError(error);
+            });
+
+        if(following){
+            //Procesar following ids
+            var following_clean = [];
+                
+            following.forEach((follow)=>{
+                following_clean.push(follow.followed)
+            });
+        }
         
-    following.forEach((follow)=>{
-        following_clean.push(follow.followed)
-    });
-    
-    //Procesar followed ids
-    var followed_clean = [];
+        if(followed){
+            //Procesar followed ids
+            var followed_clean = [];
+                
+            followed.forEach((follow)=>{
+                followed_clean.push(follow.user)
+            });
+        }
         
-    followed.forEach((follow)=>{
-        followed_clean.push(follow.user)
-    });
 
-    return {
-        following: following_clean,
-        followed: followed_clean
+        return {
+            following: following_clean,
+            followed: followed_clean
+        }
+    }catch(e){
+        console.log(e);
     }
 
 }
@@ -227,29 +248,6 @@ function getCounters(req, res){
 }
 
 /**Funcion asincrona para obtener el numero de seguidores y seguidos */
-/*async function getCountFollow(user_id){
-    var following = await Follow.countDocuments({'user':user_id}).exec((err, count) => {
-        if(err) return hadleError(err);
-        return count;
-    });
-
-    var followed = await Follow.countDocuments({'followed':user_id}).exec((err, count) => {
-        if(err) return hadleError(err);
-        return count;
-    });
-
-    var publications = await Publication.countDocuments({'user':user_id}).exec((err, count) => {
-        if(err) return handleError(err);
-        return count;
-    });
-
-    return {
-        following: following,
-        followed: followed,
-        publications: publications
-    }
-}*/
-
 const getCountFollow = async (user_id) => {
     try{
         let following = await Follow.countDocuments({"user": user_id},(err, result) => { return result });
