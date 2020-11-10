@@ -9,6 +9,9 @@ var mongoosePaginate = require('mongoose-pagination');
 var User = require('../models/user');
 var Follow = require('../models/follow');
 
+
+const itemsPerPage = 100;
+
 /*function prueba(req, res){
     res.status(200).send({message:'Hola mundo desde el controlador de Follow'});
 }*/
@@ -59,20 +62,81 @@ function getFollowingUsers(req, res){
         page = req.params.page;
     }
 
-    var itemsPerPage = 4;
+    //var itemsPerPage = 100;
+
 
     Follow.find({user:userId}).populate({path:'followed'}).paginate(page, itemsPerPage, (err, follows, total) =>{
         if(err) return res.status(500).send({message: 'Error en el servidor'});
 
         if(!follows) return res.status(404).send({message: 'No estas siguiendo a ningun usuario'});
 
-        return res.status(200).send({
-            total: total,
-            pages: Math.ceil(total/itemsPerPage),
-            follows
+        followUserId(req.user.sub).then((value) =>{
+            return res.status(200).send({
+                total: total,
+                pages: Math.ceil(total/itemsPerPage),
+                follows,
+                users_following: value.following,
+                users_follow_me: value.followed
+            });
         });
     });
 }
+
+
+const followUserId = async (user_id) => {
+    try{
+ 
+         /*array con todos los ids de los usuarios que me estan siguiendo (campo followed en la bd) user_id es el usuario
+         identificado en este momento, todos los demas valores se ponen a 0 para quitarlos de la respuesta*/
+ 
+        // var following = await Follow.find({'user':user_id}).select({'_id':0,'__v':0,'user':0}).exec((err, follows) =>{return follows;});
+         /**USUARIOS A LOS QUE SIGO */
+        var following = await Follow.find({'user':user_id}).select({'_id':0,'__v':0,'user':0}).exec()
+             .then((follows) => {
+                 return follows
+             }).catch((error) => {
+                 return handleError(error);
+             });
+        
+         //var followed = await Follow.find({'followed':user_id}).select({'_id':0,'__v':0,'followed':0}).exec((err, follows) =>{return follows;});
+         /**USUARIOS QUE ME SIGUEN */
+         var followed = await Follow.find({'followed':user_id}).select({'_id':0,'__v':0,'followed':0}).exec()
+             .then((follows) => {
+                 return follows
+             }).catch((error) => {
+                 return handleError(error);
+             });
+ 
+         if(following){
+             //Procesar following ids
+             var following_clean = [];
+                 
+             following.forEach((follow)=>{
+                 following_clean.push(follow.followed)
+             });
+         }
+         
+         if(followed){
+             //Procesar followed ids
+             var followed_clean = [];
+                 
+             followed.forEach((follow)=>{
+                 followed_clean.push(follow.user)
+             });
+         }
+         
+ 
+         return {
+             following: following_clean,
+             followed: followed_clean
+         }
+     }catch(e){
+         console.log(e);
+     }
+ 
+ }
+
+
 
 /**Obtener todos los usuarios que me siguen */
 function getFollowedUsers(req, res){
@@ -88,17 +152,21 @@ function getFollowedUsers(req, res){
         page = req.params.page;
     }
 
-    var itemsPerPage = 4;
+    //var itemsPerPage = 100;
 
     Follow.find({followed:userId}).populate({path:'user'}).paginate(page, itemsPerPage, (err, follows, total) =>{
         if(err) return res.status(500).send({message: 'Error en el servidor'});
 
         if(!follows) return res.status(404).send({message: 'No estas te sigue ningun usuario'});
 
-        return res.status(200).send({
-            total: total,
-            pages: Math.ceil(total/itemsPerPage),
-            follows
+        followUserId(req.user.sub).then((value) =>{
+            return res.status(200).send({
+                total: total,
+                pages: Math.ceil(total/itemsPerPage),
+                follows,
+                users_following: value.following,
+                users_follow_me: value.followed
+            });
         });
     });
 }

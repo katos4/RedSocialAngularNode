@@ -11,6 +11,7 @@ var jwt = require('../services/jwt');
 const user = require('../models/user');
 
 
+const itemsPerPage = 100;
 
 function home(req,res){
     res.status(200).send({
@@ -36,7 +37,7 @@ function saveUser(req, res){
         user.surname = params.surname;
         user.nick = params.nick;
         user.email = params.email;
-        user.role = 'ROLE USER';
+        user.role = 'ROLE_USER';
         user.image = null;
 
         //comprobar que no haya otro usuario con el mismo email o nick
@@ -134,20 +135,50 @@ function getUser(req, res){
 
 /**Promesa para comprobar si al obtener un usuario, dicho usuario me sigue a mi o yo a el */
 async function followThisUser(identity_user_id, user_id){
-    var following = await Follow.findOne({'user':identity_user_id, 'followed': user_id}).exec((err, follow) =>{
-        if(err) return handleError(err);
-        return follow;
-    });
+    try{
 
-    var followed = await (await Follow.findOne({'user': user_id, 'followed': identity_user_id})).exec((err, follow) =>{
-        if(err) return handleError(err);
-        return follow;
-    });
-
-    return {
-        following: following,
-        followed: followed
+        var following = await Follow.find({'user':identity_user_id, 'followed': user_id}).exec()
+        .then((follows) => {
+            return follows
+        }).catch((error) => {
+            return handleError(error);
+        });
+        
+      /*  var following = await Follow.findOne({'user':identity_user_id, 'followed': user_id}).exec((err, follow) =>{
+            if(err) return handleError(err);
+            return follow;
+        });*/
+    
+        var followed = await Follow.find({'user':user_id, 'followed': identity_user_id}).exec()
+        .then((follows) => {
+            return follows
+        }).catch((error) => {
+            return handleError(error);
+        });
+        /*var followed = await (await Follow.findOne({'user': user_id, 'followed': identity_user_id})).exec((err, follow) =>{
+            if(err) return handleError(err);
+            return follow;
+        });*/
+    
+        return {
+            following: following,
+            followed: followed
+        }
+    }catch(e){
+        console.log(e);
     }
+    
+}
+
+function getFriends(req, res){
+    var user_id = req.params.id;
+
+    User.find({'_id': user_id}, (err, users) => {
+        if(err) return res.status(500).send({message: 'Error en la peticion'});
+        if(!users) return res.status(404).send({message: 'No hay usuarios disponibles'});
+
+        return res.status(200).send({users});
+    });
 }
 
 
@@ -161,7 +192,7 @@ function getUsers(req, res){
         page = req.params.page;
     }
 
-    var itemsPerPage = 5;
+    //var itemsPerPage = 100;
 
     User.find().sort('_id').paginate(page, itemsPerPage, (err, users, total) =>{
         if(err) return res.status(500).send({message:'Error en la peticion'});
@@ -370,9 +401,11 @@ module.exports = {
     saveUser,
     loginUser,
     getUser,
+    getFriends,
     getUsers,
     getCounters,
     updateUser,
     uploadImage,
     getImageFile
+    
 }

@@ -10,6 +10,7 @@ var mongoosePaginate = require('mongoose-pagination');
 var Publication = require('../models/publication');
 var User = require('../models/user');
 var Follow = require('../models/follow');
+var Like = require('../models/like');
 
 
 function probando(req, res){
@@ -59,8 +60,39 @@ function getPublications(req, res){
             follows_clean.push(follow.followed);
         });
 
+        follows_clean.push(req.user.sub);
         /**Buscar las publicaciones cuyo id coincida con alguno de dentro del array anterior */
         Publication.find({user: {"$in": follows_clean}}).sort('-created_at').populate('user').paginate(page, itemsPerPage, (err, publications, total) =>{
+            if(err) res.status(500).send({message:'Error al devolver publicaciones'});
+        
+            if(!publications) res.status(404).send({message:'No hay publicaciones'});
+
+           return res.status(200).send({
+                total_items: total,
+                pages: Math.ceil(total/itemsPerPage),
+                page: page,
+                items_per_page: itemsPerPage,
+                publications
+            });
+        });
+
+    });
+}
+
+/**Obtener todas las publicaciones de UN UNICO usuario */
+function getPublicationsUser(req, res){
+    var page = 1;
+    if(req.params.page){
+        page = req.params.page;
+    }
+
+    var user = req.user.sub;
+    if(req.params.user){
+        user = req.params.user;
+    }
+        var itemsPerPage = 200;
+        /**Buscar las publicaciones cuyo id coincida con alguno de dentro del array anterior */
+        Publication.find({user: user}).sort('-created_at').populate('user').paginate(page, itemsPerPage, (err, publications, total) =>{
             if(err) res.status(500).send({message:'Error al devolver publicaciones'});
         
             if(!publications) res.status(404).send({message:'No hay publicaciones'});
@@ -69,11 +101,10 @@ function getPublications(req, res){
                 total_items: total,
                 pages: Math.ceil(total/itemsPerPage),
                 page: page,
+                items_per_page: itemsPerPage,
                 publications
             });
         });
-
-    });
 }
 
 /**Obtener una sola publicacion segun su id */
@@ -97,7 +128,7 @@ function deletePublication(req, res){
     Publication.find({'user': req.user.sub, '_id':publicationId}).remove(err => {
         if(err) res.status(500).send({message: 'Error al borrar publicacion'});
 
-        if(!publicationRemoved) res.status(404).send({message:'No se ha borrado la publicacion'});
+        //if(!publicationRemoved) res.status(404).send({message:'No se ha borrado la publicacion'});
     
         return res.status(200).send({message: 'Publicacion eliminada correctamente'});
     });
@@ -157,7 +188,7 @@ function removeFilesOfUploads(res, filePath, message){
 /**DEVOLVER IMAGEN DEL USUARIO */
 function getImageFile(req, res){
     var imageFile = req.params.imageFile;
-    var pathFile = './uploads/publications'+imageFile;
+    var pathFile = './uploads/publications/'+imageFile;
 
     fs.exists(pathFile, (exists) =>{
         if(exists){
@@ -165,7 +196,8 @@ function getImageFile(req, res){
         }else{
             res.status(200).send({message:'No existe ese fichero'});
         }
-    })
+    });
+
 }
 
 
@@ -177,5 +209,6 @@ module.exports = {
     getPublication,
     deletePublication,
     uploadImage,
-    getImageFile
+    getImageFile,
+    getPublicationsUser
 }

@@ -36,6 +36,51 @@ function saveMessage(req, res){
     
 }
 
+
+function getAllMessagesEmitted(req, res){
+    var emitter = req.user.sub;
+    var receiver = req.params.id;
+
+    Message.find({emitter: emitter, receiver: receiver}).populate('receiver', 'nick').exec((err, messages) => {
+        if(err) return res.status(500).send({message: 'Error en la peticion'});
+        if(!messages) return res.status(404).send({message: 'No hay mensajes'});
+
+        return res.status(200).send({
+            messages
+        });
+    }); 
+}
+
+function getAllMessagesReceived(req, res){
+    var emitter = req.user.sub;
+    var receiver = req.params.id;
+
+    Message.find({emitter: receiver, receiver: emitter}).populate('receiver', 'nick').exec((err, messages) => {
+        if(err) return res.status(500).send({message: 'Error en la peticion'});
+        if(!messages) return res.status(404).send({message: 'No hay mensajes'});
+
+        return res.status(200).send({
+            messages
+        });
+    }); 
+}
+
+
+/**Obtener un solo mensaje */
+
+function getSingleMessage(req, res){
+    var messageId = req.params.id;
+
+    Message.find({'_id': messageId}).populate('emitter receiver', 'name surname nick image _id').exec((err, message) => {
+        if(err) return res.status(500).send({message: 'Error en la peticion'});
+        if(!message) return res.status(404).send({message: 'No existe ese mensaje'});
+
+        return res.status(200).send({
+            message
+        });
+    });
+}
+
 /**Listar los mensajes recibidos */
 function getReceivedMessage(req, res){
     var userId = req.user.sub;
@@ -45,9 +90,9 @@ function getReceivedMessage(req, res){
         page = req.params.page;
     }
 
-    var itemsPerPage = 4;
+    var itemsPerPage = 7;
 
-    Message.find({receiver: userId}).populate('emitter', 'name surname nick image _id').paginate(page, itemsPerPage, (err, messages, total) => {
+    Message.find({receiver: userId}).populate('emitter', 'name surname nick image _id').sort({'created_at':-1}).paginate(page, itemsPerPage, (err, messages, total) => {
         if(err) return res.status(500).send({message: 'Error en la peticion'});
         if(!messages) return res.status(404).send({message: 'No hay mensajes'});
     
@@ -69,9 +114,9 @@ function getEmitterMessages(req, res){
         page = req.params.page;
     }
 
-    var itemsPerPage = 4;
+    var itemsPerPage = 7;
 
-    Message.find({emitter: userId}).populate('emitter receiver', 'name surname nick image _id').paginate(page, itemsPerPage, (err, messages, total) => {
+    Message.find({emitter: userId}).populate('emitter receiver', 'name surname nick image _id').sort({'created_at':-1}).paginate(page, itemsPerPage, (err, messages, total) => {
         if(err) return res.status(500).send({message: 'Error en la peticion'});
         if(!messages) return res.status(404).send({message: 'No hay mensajes'});
     
@@ -107,11 +152,25 @@ function setViewedMessage(req, res){
     });
 }
 
+function deleteMessage(req, res){
+    var messageId = req.params.id;
+    
+    Message.find({'_id': messageId}).remove((err =>{
+        if(err)  return res.status(500).send({message: 'Error al borrar el mensaje'});
+
+        return res.status(200).send({message:'El mensaje se ha eliminado correctamente'});
+    }))
+}
+
 module.exports = {
     probando,
     saveMessage,
+    getAllMessagesEmitted,
+    getAllMessagesReceived,
+    getSingleMessage,
     getReceivedMessage,
     getEmitterMessages,
     getUnviewedMessages,
-    setViewedMessage
+    setViewedMessage,
+    deleteMessage
 }

@@ -12,6 +12,12 @@ api.get('/my-messages/:page?', md_auth.ensureAuth, MessageController.getReceived
 api.get('/messages/:page?', md_auth.ensureAuth, MessageController.getEmitterMessages);
 api.get('/unviewed-messages', md_auth.ensureAuth, MessageController.getUnviewedMessages);
 api.get('/set-viewed-messages', md_auth.ensureAuth, MessageController.setViewedMessage);
+api.get('/allMessages/:id', md_auth.ensureAuth, MessageController.getAllMessagesEmitted);
+api.get('/allMessagesReceived/:id', md_auth.ensureAuth, MessageController.getAllMessagesReceived);
+api.get('/single-message/:id', md_auth.ensureAuth, MessageController.getSingleMessage);
+api.delete('/delete-message/:id', md_auth.ensureAuth, MessageController.deleteMessage);
+
+
 
 
 

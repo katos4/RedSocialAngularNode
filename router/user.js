@@ -21,6 +21,8 @@ api.get('/counters/:id?', middleAuth.ensureAuth, UserController.getCounters);
 api.put('/update-user/:id', middleAuth.ensureAuth, UserController.updateUser);
 api.post('/upload-image-user/:id',[middleAuth.ensureAuth, middleUpload], UserController.uploadImage);
 api.get('/get-image-user/:imageFile', UserController.getImageFile);
+api.get('/friends/:id', middleAuth.ensureAuth, UserController.getFriends);
+
 
 
 module.exports = api;
