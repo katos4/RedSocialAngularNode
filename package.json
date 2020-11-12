@@ -4,7 +4,8 @@
   "description": "Backend para el proyecto de una red social",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "development": "nodemon index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Grego",

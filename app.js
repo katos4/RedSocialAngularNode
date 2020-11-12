@@ -16,6 +16,7 @@ var follow_routes = require('./router/follow');
 var publication_routes = require('./router/publication');
 var message_routes = require('./router/message');
 var like_routes = require('./router/like');
+var comment_routes = require('./router/comment');
 
 //const api = require('./router/user');
 
@@ -42,6 +43,7 @@ app.use('/api', follow_routes);
 app.use('/api', publication_routes);
 app.use('/api', message_routes);
 app.use('/api', like_routes);
+app.use('/api', comment_routes);
 
 /**exportar configuracion*/
 module.exports = app;
