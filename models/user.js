@@ -12,6 +12,13 @@ var UserSchema = Schema({
     password: String,
     role: String,
     image: String,
+    work: String,
+    study: String,
+    city: String,
+    birth: String,
+    gender: String,
+    relationship: String,
+    biography: String
 });
 
 

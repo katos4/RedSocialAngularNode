@@ -1,7 +1,7 @@
 'use strict'
 
 /**Cargar librerias y dependencias. */
-
+var moment = require('moment');
 var mongoosePaginate = require('mongoose-pagination');
 
 
@@ -24,7 +24,7 @@ function saveComment(req, res){
     comment.user = req.user.sub
     comment.publication = params.publication
     comment.text = params.text;
-
+    comment.created_at = moment().unix();
 
     comment.save((err, commentStored) => {
         if(err) return res.status(500).send({message: 'Error al guardar el comentario'});
@@ -51,13 +51,25 @@ function deleteComment(req, res){
 
 function getComments(req, res){
     var publicationId = req.params.id;
+    var page = 1;
+    if(req.params.page){
+        page = req.params.page;
+    }
 
-    Comment.find({publication: publicationId}).populate('user', '_id name nick image').exec((err, comments) => {
+    var itemsPerPage = 15;
+
+    Comment.find({publication: publicationId}).sort('-created_at').populate('user', '_id name nick image').paginate(page, itemsPerPage, (err, comments, total) => {
         if(err) return res.status(500).send({message: 'Error en el servidor'});
 
         if(!comments) return res.status(404).send({message: 'No hay ningun comentario'});
 
-        return res.status(200).send({comments});
+        return res.status(200).send({
+            total_items: total,
+            pages: Math.ceil(total/itemsPerPage),
+            page: page,
+            items_per_page: itemsPerPage,
+            comments
+        });
     });
 }
 

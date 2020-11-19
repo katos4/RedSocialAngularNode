@@ -39,6 +39,12 @@ function saveUser(req, res){
         user.email = params.email;
         user.role = 'ROLE_USER';
         user.image = null;
+        user.work = "",
+        user.study = "",
+        user.city = "",
+        user.birth = "",
+        user.gender = "",
+        user.relationship = ""
 
         //comprobar que no haya otro usuario con el mismo email o nick
         User.find({$or: [
@@ -389,9 +395,6 @@ function getImageFile(req, res){
         }
     })
 }
-
-
-/**Contador de publicaciones */
 
 
 
