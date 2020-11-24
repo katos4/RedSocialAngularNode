@@ -45,6 +45,17 @@ function deleteLike(req, res){
       }))
 }
 
+function deleteAllLikes(req, res){
+    var userId = req.user.sub;
+    var publicationId = req.params.id;
+
+    Like.deleteMany({'publication':publicationId}).remove((err =>{
+        if(err)  return res.status(500).send({message: 'Error al eliminar comentario'});
+
+        return res.status(200).send({message:'TODOS los likes se han eliminado correctamente'});
+    }))
+}
+
 function getLikes(req, res){
 
     var userId = req.user.sub;
@@ -83,6 +94,7 @@ module.exports = {
     saveLike,
     pruebaLike,
     deleteLike,
+    deleteAllLikes,
     getLikes,
     countLikes
 }

@@ -10,6 +10,12 @@ var port = 3800;
 var port2 = 5000;
 var server = require('http').Server(app);
 
+const host = process.env.HOST || '0.0.0.0';
+const puerto = process.env.PORT || 3800;
+
+//importar variables de entorno local
+require('dotenv').config({path: 'variables.env'});
+
 //servidor de websocket
 var io = require('socket.io')(server);
 
@@ -53,18 +59,15 @@ io.on('connection', (socket) => {
 
 /**Conexion a la base de datos*/
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/social-network', {useMongoClient: true}, {useNewUrlParser: true})
+//mongoose.connect('mongodb://localhost:27017/social-network', {useMongoClient: true}, {useNewUrlParser: true})
+mongoose.connect(process.env.DB_URL, {useMongoClient: true}, {useNewUrlParser: true})
     .then(()=>{
         console.log("La conexion a la base de datos social-network se ha realizado correctamente");
 
         /**crear servidor*/
 
-        app.listen(port, () => {
-            console.log("Servidor corriendo correctamente en http://localhost:3800");
-        });
-
-        server.listen(port2, () =>{
-            console.log("Socket corriendo correctamente en http://localhost:5000"); 
+        app.listen(puerto, host, () => {
+            console.log("SERVIDOR FUNCIONANDO CORRECTAMENTE!!!");
         });
     })
     .catch(err => {console.log(err)});

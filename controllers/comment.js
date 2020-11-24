@@ -49,6 +49,17 @@ function deleteComment(req, res){
     }))
 }
 
+function deleteAllComments(req, res){
+    var userId = req.user.sub;
+    var publicationId = req.params.id;
+
+    Comment.deleteMany({'user':userId, 'publication':publicationId}).remove((err =>{
+        if(err)  return res.status(500).send({message: 'Error al eliminar comentario'});
+
+        return res.status(200).send({message:'TODOS los comentarios se han eliminado correctamente'});
+    }))
+}
+
 function getComments(req, res){
     var publicationId = req.params.id;
     var page = 1;
@@ -78,5 +89,6 @@ module.exports = {
     pruebaComentario,
     saveComment,
     deleteComment,
+    deleteAllComments,
     getComments
 }
