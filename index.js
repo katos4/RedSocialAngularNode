@@ -16,46 +16,6 @@ const puerto = process.env.PORT || 3800;
 //importar variables de entorno local
 require('dotenv').config({path: 'variables.env'});
 
-//servidor de websocket
-var io = require('socket.io')(server);
-
-var myMessages = [];
-var disconnectedUsers = [];
-var connectedUsers = [];
-
-io.on('connection', (socket) => {
-    console.log("ALGUIEN SE HA CONECTADOo CON SOCKETS");
-    console.log("EL ID DEL SOCKET ES "+socket.id);
-   
-    //escuchar el mensaje del cliente
-    socket.on('send-message', (data) => {
-        myMessages.push(data);
-        socket.emit('text-event',myMessages);
-        
-        socket.broadcast.emit('text-event',myMessages);
-    });
-
-    socket.on('get-friends', (data) => {
-        
-        disconnectedUsers.push(data);
-        socket.broadcast.emit('all-users',disconnectedUsers);
-        
-        
-    });
-
-    socket.on('new-user', (data, callback) => {
-
-    });
-
-  
-
-    //ver cuando un usuario se ha desconectado
-    socket.on('disconnect', () => {
-        console.log("UN USUARIO SE HA DESCONECTADO");
-    });
-});
-
-
 
 /**Conexion a la base de datos*/
 mongoose.Promise = global.Promise;
