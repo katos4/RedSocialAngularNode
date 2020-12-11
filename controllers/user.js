@@ -396,6 +396,24 @@ function getImageFile(req, res){
     })
 }
 
+function updatePassword(req, res){
+    var userId = req.user.sub;
+    var newPass = req.body;
+    var user = new User();
+
+    bcrypt.hash(params.password, null, null, (err, hash) =>{
+        user.password = hash;
+
+        //guardar el usuario en la bd
+        User.findByIdAndUpdate(userId, { $set: {password: newPass}}, (err, passUpdated) => {
+            if(err) return res.status(500).send({message:'Error en la peticion'});
+        
+            if(!passUpdated) return res.status(404).send({message:'No se ha podido actualizar la contraseña'});
+    
+            return res.status(200).send({user: passUpdated});
+        });
+    });
+}
 
 
 module.exports = {
@@ -409,6 +427,7 @@ module.exports = {
     getCounters,
     updateUser,
     uploadImage,
-    getImageFile
+    getImageFile,
+    updatePassword
     
 }

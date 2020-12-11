@@ -19,6 +19,7 @@ api.get('/user/:id', middleAuth.ensureAuth, UserController.getUser);
 api.get('/users/:page?', middleAuth.ensureAuth, UserController.getUsers);
 api.get('/counters/:id?', middleAuth.ensureAuth, UserController.getCounters);
 api.put('/update-user/:id', middleAuth.ensureAuth, UserController.updateUser);
+api.put('/update-pass/:id?', middleAuth.ensureAuth, UserController.updatePassword);
 api.post('/upload-image-user/:id',[middleAuth.ensureAuth, middleUpload], UserController.uploadImage);
 api.get('/get-image-user/:imageFile', UserController.getImageFile);
 api.get('/friends/:id', middleAuth.ensureAuth, UserController.getFriends);
